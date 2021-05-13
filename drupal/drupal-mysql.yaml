@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drupal-mysql
+  labels:
+    app: drupal-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drupal-mysql
+  template:
+    metadata:
+      labels:
+        app: drupal-mysql
+    spec:
+      containers:
+      - name: cont-drupal-mysql
+        image: mysql:5.7
+        ports:
+        - containerPort: 3306
+          name: mysql
+          protocol: TCP
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: drupal-mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_USER
+          valueFrom: 
+            secretKeyRef:
+              name: drupal-mysql-secret
+              key: MYSQL_USER
+        - name: MYSQL_DATABASE
+          valueFrom: 
+            secretKeyRef:
+              name: drupal-mysql-secret
+              key: MYSQL_DATABASE
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: drupal-mysql-pv
+          subPath: dbdata
+      volumes:
+      - name: drupal-mysql-pv
+        persistentVolumeClaim:
+          claimName: drupal-mysql-pvc
+ 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: drupal-mysql-service
+spec:
+  selector:
+    app: drupal-mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      name: drupal-mysql

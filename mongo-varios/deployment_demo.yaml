@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-deploy
+spec:
+  selector:
+    matchLabels:
+      app: node
+  replicas: 2 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: node
+    spec:
+      containers:
+      - name: node
+        image: gcr.io/kodekloud/centos-ssh-enabled:node
+        ports:
+        - containerPort: 80
